@@ -22,7 +22,29 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+1. Add table and field comments in your migrations like:
+```ruby
+create_table :products, comment: '产品' do |t|
+    t.string :name, comment: '产品名称'
+    t.string :barcode, comment: '条形码'
+    t.string :description, comment: '产品说明'
+    t.float :msrp, comment: '最高售价'
+    t.float :our_price, comment: '售价'
+
+    t.timestamps
+end
+```
+
+2. Run your migration.
+```shell
+rake db:migrate
+```
+
+3. rake command:
+
+```shell
+rake i18n:from_comments
+```
 
 ## Development
 
