@@ -46,6 +46,8 @@ rake db:migrate
 rake i18n:from_comments
 ```
 
+This will generate config/locales/zh-CN.yml file for views.
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
