@@ -1,3 +1,14 @@
+def get_models(namespace="Module")
+    models = []
+    namespace.constantize.constants.each do |constant|
+        const = namespace.constantize.const_get(constant)
+        if const.is_a? Class and const < ApplicationRecord
+            models.append const
+        end
+    end
+    return models
+end
+
 namespace :i18n do
     task :from_comments => :environment do
         zh_file = Rails.root.join('config/locales/zh-CN.yml').to_s
@@ -8,13 +19,22 @@ namespace :i18n do
         langs['zh-CN']['activerecord']['models'] ||= {}
         langs['zh-CN']['activerecord']['attributes'] ||= {}
         # 2. read comments
-        system_tables = ["active_storage_attachments", "active_storage_blobs", "ar_internal_metadata", "schema_migrations"]
-        ActiveRecord::Base.connection.tables.each do |table|
-            next if system_tables.include?(table)
-            langs['zh-CN']['activerecord']['models'][table.singularize] ||= ActiveRecord::Base.connection.table_comment(table)
-            langs['zh-CN']['activerecord']['attributes'][table.singularize] ||= {}
-            table.singularize.camelize.constantize.columns.each do |column|
-                langs['zh-CN']['activerecord']['attributes'][table.singularize][column.name] ||= column.comment
+        # 2.1 read all models without namespace
+        models = get_models
+        # 2.2 get all models in namespaces
+        models_dir = Rails.root.join('app/models')
+        dirs = Dir.entries(models_dir).map{|d| d if File.directory?(models_dir.join(d)) and ![".","..","concerns"].include?(d)}.compact
+        dirs.each do |dir|
+            models = models + get_models(dir.camelize)
+        end
+        p models
+        # 2.3 fill languages
+        models.each do |model|
+            model_name = model.model_name.i18n_key.to_s
+            langs['zh-CN']['activerecord']['models'][model_name] ||= ActiveRecord::Base.connection.table_comment(model.table_name)
+            langs['zh-CN']['activerecord']['attributes'][model_name] ||= {}
+            model.columns.each do |column|
+                langs['zh-CN']['activerecord']['attributes'][model_name][column.name] ||= column.comment
             end
         end
 
