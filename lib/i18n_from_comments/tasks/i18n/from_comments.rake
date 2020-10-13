@@ -11,13 +11,15 @@ end
 
 namespace :i18n do
     task :from_comments => :environment do
-        zh_file = Rails.root.join('config/locales/zh-CN.yml').to_s
+        lang = ENV['LANG']
+        lang ||= 'zh-CN'
+        zh_file = Rails.root.join("config/locales/#{lang}.yml").to_s
         # 1. read zh-CN.yml
         langs = YAML.load_file(zh_file)
-        langs['zh-CN'] ||= {}
-        langs['zh-CN']['activerecord'] ||= {}
-        langs['zh-CN']['activerecord']['models'] ||= {}
-        langs['zh-CN']['activerecord']['attributes'] ||= {}
+        langs[lang] ||= {}
+        langs[lang]['activerecord'] ||= {}
+        langs[lang]['activerecord']['models'] ||= {}
+        langs[lang]['activerecord']['attributes'] ||= {}
         # 2. read comments
         # 2.1 read all models without namespace
         models = get_models
@@ -31,10 +33,10 @@ namespace :i18n do
         # 2.3 fill languages
         models.each do |model|
             model_name = model.model_name.i18n_key.to_s
-            langs['zh-CN']['activerecord']['models'][model_name] ||= ActiveRecord::Base.connection.table_comment(model.table_name)
-            langs['zh-CN']['activerecord']['attributes'][model_name] ||= {}
+            langs[lang]['activerecord']['models'][model_name] ||= ActiveRecord::Base.connection.table_comment(model.table_name)
+            langs[lang]['activerecord']['attributes'][model_name] ||= {}
             model.columns.each do |column|
-                langs['zh-CN']['activerecord']['attributes'][model_name][column.name] ||= column.comment
+                langs[lang]['activerecord']['attributes'][model_name][column.name] ||= column.comment
             end
         end
 

@@ -43,10 +43,12 @@ rake db:migrate
 3. rake command:
 
 ```shell
-rake i18n:from_comments
+rake i18n:from_comments LANG=zh-CN
 ```
 
 This will generate config/locales/zh-CN.yml file for views.
+
+Special any other language with environment variable LANG
 
 ## Development
 
